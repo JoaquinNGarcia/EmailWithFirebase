@@ -12,11 +12,20 @@ import {
 	Link,
 	useHistory
 } from "react-router-dom";
+import moment from 'moment';
 
 const Dashboard = () => {
     const [ error, setError ] = useState("");
     const { currentUser, logout } = useAuth()
     const history = useHistory();
+
+    const time = moment().format('HH:mm');
+    const greet = ( time >= '06:00') && ( time < '13:00')
+        ? 'Buenos dias'
+        : (time >= '13:00') && ( time < '20:00')
+            ? 'Buenas tardes'
+            : 'Buenas noches';
+
 
     async function handleLogout() {
         setError("");
@@ -36,6 +45,10 @@ const Dashboard = () => {
                 <Card.Body>
                     <h2 className="text-center mb-4"> Perfil </h2>
                     { error && <Alert variant="danger"> { error } </Alert> }
+                    <strong>
+                        { `${ greet }` }
+                    </strong>
+                    {`, ${ currentUser.email }` }
                     <strong> Email: </strong>
                     { currentUser.email }
                     <Link to="/updateProfile" className="btn btn-info w-100 mt-3">
