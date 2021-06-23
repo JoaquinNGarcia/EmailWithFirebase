@@ -14,6 +14,7 @@ import {
 	Link,
 	useHistory
 } from "react-router-dom";
+import Dashboard from '../Dashboard/dashboard';
 
 // import welcomeMail from "../../../../functions/src/index";
 
@@ -21,9 +22,12 @@ const Signup = () => {
     const emailRef = useRef();
     const passwordRef = useRef();
     const passwordConfirmRef = useRef();
+	const isTeacherRef = useRef();
+	
     const { signup } = useAuth();
     const [ error, setError ] = useState("");
     const [ loading, setLoading ] = useState(false);
+	const [ isTeacher, setIsTeacher ] = useState(false);
     const history = useHistory();
 
 	async function handleSubmit(e) {
@@ -37,9 +41,10 @@ const Signup = () => {
 		try {
 			setError("");
 			setLoading(true);
-			await signup(emailRef.current.value, passwordRef.current.value)
+			await signup(emailRef.current.value, passwordRef.current.value);
 			// await firebase.welcomeMail(emailRef.current.value, passwordRef.current.value)
-
+			console.log('Signup - isTeacher: ', isTeacher);
+			<Dashboard isTeacherProp={ isTeacher }/>
 			history.push("/");
 		} catch {
 			setError("No se pudo crear una cuenta.");
@@ -76,6 +81,24 @@ const Signup = () => {
 								required
 							/>
 						</Form.Group>
+
+						<Form.Check
+							type="switch"
+							id="custom-switch"
+							className="mb-2"
+							label="Docente"
+							inline
+							onChange={ ({ target: { checked }}) => setIsTeacher(checked) }
+						/>
+
+						<Form.Check 
+							type="checkbox"
+							id="autoSizingCheck"
+							className="mb-2"
+							label="Recuerdame"
+							inline
+							custom
+						/>
 
 						<Button disable={ loading } className="w-100 btn-info" type="submit" >
 							Inscribirse

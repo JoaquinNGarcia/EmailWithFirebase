@@ -5,7 +5,8 @@ import React,
 import {
 	Alert,
 	Button,
-	Card
+	Card,
+    Form
 } from "react-bootstrap";
 import { useAuth } from "../../contexts/authContext";
 import {
@@ -14,10 +15,11 @@ import {
 } from "react-router-dom";
 import moment from 'moment';
 
-const Dashboard = () => {
+const Dashboard = ( { isTeacherProp } ) => {
     const [ error, setError ] = useState("");
-    const { currentUser, logout } = useAuth()
+    const { currentUser, logout } = useAuth();
     const history = useHistory();
+
 
     const time = moment().format('HH:mm');
     const greet = ( time >= '06:00') && ( time < '13:00')
@@ -41,8 +43,12 @@ const Dashboard = () => {
 
     return (
         <>
+            {/* { console.log('props: ', props) } */}
+            { console.log('isTeacherProp: ', isTeacherProp) }
+            
             <Card>
                 <Card.Body>
+                    { console.log('currentUser: ', currentUser) }
                     <h2 className="text-center mb-4"> Perfil </h2>
                     { error && <Alert variant="danger"> { error } </Alert> }
                     <strong>
@@ -56,6 +62,14 @@ const Dashboard = () => {
                     </Link>
                 </Card.Body>
             </Card>
+            <Form>
+                <div className="mb-1">
+                    <Form.File id="file">
+                        <Form.File.Input />
+                    </Form.File>
+                </div>
+            </Form>
+
             <div className="w-100 text-center mt-2">
                 <Button variant="link" onClick={ handleLogout }>
                     Cerrar sesión
