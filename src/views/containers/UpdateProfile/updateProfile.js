@@ -92,7 +92,7 @@ const UpdateProfile = () => {
                     </Form>
                 </Card.Body>
             </Card>
-            <div className="w-100 text-center mt-2">
+            <div className="w-100 text-center mt-2 mb-2">
                 <Link to="/">Cancelar</Link>
             </div>
         </>

@@ -1,8 +1,77 @@
+/* eslint-disable */
 const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+const express = require("express");
+const cors = require("cors");
+
+admin.initializeApp();
+const db = admin.firestore();
+
+const app = express();
+
+app.use(cors({ origin: true }));
+
+module.exports = {
+    ...require('./controllers/user')
+}
+
+exports.onUserCreate = functions.firestore.document('users/{userId}').onCreate(async (snap, context) => {
+    const values = snap.data();
+    // send email
+    await db.collection('logging').add({ description: `Email was sent to user with username:${values.username}` });
+})
+
+exports.onUserUpdate = functions.firestore.document('users/{userId}').onUpdate(async (snap, context) => {
+    const newValues = snap.after.data();
+    const previousValues = snap.before.data();
+    if (newValues.username !== previousValues.username) {
+        const snapshot = await db.collection('reviews').where('username', '==', previousValues.username).get();
+        let updatePromises = [];
+        snapshot.forEach(doc => {
+            updatePromises.push(db.collection('reviews').doc(doc.id).update({ username: newValues.username }));
+        });
+        await Promise.all(updatePromises);
+    }
+})
+
+exports.onPostDelete = functions.firestore.document('posts/{postId}').onDelete(async (snap, context) => {
+    const deletedPost = snap.data();
+    let deletePromises = [];
+    const bucket = admin.storage().bucket();
+    deletedPost.images.forEach(image => {
+        deletePromises.push(bucket.file(image).delete());
+    });
+    await Promise.all(deletePromises);
+});
+
+exports.helloWorld = functions.https.onRequest((request, response) => {
+  functions.logger.info("Hello logs", {structureData: true});
+  response.send("Hello from Firebase!");
+});
+
+exports.sendEmail = functions.https.onRequest( (request, response) => {
+      console.log("sendEmail");
+    });
+
+
+
+// ---------------------------------------------------------------------------------------------------
+
+
+
+
+// ---------------------------------------------------------------------------------------------------
+
+
+
+
+// ---------------------------------------------------------------------------------------------------
+
 // const nodemailer = require("nodemailer");
 
-// const admin = require("firebase-admin");
-// admin.initializeApp();
+// import * as functions from 'firebase-functions'; //probando
+
+// admin.initializeApp(functions.config().firebase);
 
 // const mailTransport = nodemailer.createTransport({
 //   service: "gmail",
@@ -25,20 +94,15 @@ const functions = require("firebase-functions");
 //   });
 // });
 
-exports.helloWorld = functions.https.onRequest((request, response) => {
-  functions.logger.info("Hello logs", {structureData: true});
-  response.send("Hello from Firebase!");
-});
-
 
 // const createNotification = ((notification) => {
-//   return admin.firestore().collection("notifications")
+//   return db.collection("notifications")
 //       .add(notification)
 //       .then( (doc) => console.log("notification added", doc));
 // });
 
 // exports.userJoined = functions.auth.user().onCreate( (user) => {
-//   return admin.firestore().collection( "users" )
+//   return db.collection( "users" )
 //       .doc(user.uid).get().then( (doc) => {
 //         const newUser = doc.data();
 //         const notification = {

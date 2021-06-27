@@ -44,7 +44,7 @@ const Login = () => {
                 <Card.Body>
                 <h2 className="text-center mb-4"> ¡Inicia sesión en tu cuenta de LanguageApp! </h2>
                 { error && <Alert variant="danger">{ error }</Alert> }
-                <Form onSubmit={ handleSubmit }>
+                <Form onSubmit={ handleSubmit }>                    
                     <Form.Group id="email">
                         <Form.Label> Email </Form.Label>
                         <Form.Control type="email" ref={ emailRef } required />
@@ -55,6 +55,15 @@ const Login = () => {
                         <Form.Control type="password" ref={ passwordRef } required />
                     </Form.Group>
                     
+                    <Form.Check 
+                        type="checkbox"
+                        id="autoSizingCheck"
+                        className="mb-2"
+                        label="Recuerdame"
+                        inline
+                        custom
+                    />
+
                     <Button disabled={ loading } className="w-100 btn-info" type="submit">
                         Iniciar sesión
                     </Button>
@@ -64,6 +73,9 @@ const Login = () => {
                 </div>
                 </Card.Body>
             </Card>
+
+
+
             <div className="w-100 text-center mt-2">
                 ¿No tienes una cuenta?
                 <Link to="/signup"> Regístrate </Link>
