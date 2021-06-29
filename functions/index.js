@@ -23,6 +23,11 @@ const mailTransport = nodemailer.createTransport({
 exports.welcomeMail = functions.auth.user().onCreate((user) => {
   const email = user.email;
   const name = user.name;
+  return sendWelcomeMail(email, name);
+});
+
+//aux function
+function sendWelcomeMail(email, name) {
   return mailTransport.sendMail({
     from: process.env.SENDER_EMAIL,
     to: email,
@@ -32,8 +37,8 @@ exports.welcomeMail = functions.auth.user().onCreate((user) => {
        <p>Esto es una prueba</p> `,
   })
 	.then(res => console.log(res))
-	.catch(error => error);
-});
+	.catch(error => console.log(error) );
+}
 
 // cloud function
 exports.goodbyeEmail = functions.auth.user().onDelete((user) => {
@@ -55,6 +60,11 @@ async function sendGoodbyeMail(email, name) {
     return null;
 }
 
+
+exports.helloWorld = functions.https.onRequest((request, response) => {
+  functions.logger.info("Hello logs", {structureData: true});
+  response.send("Hello from Firebase!");
+});
 
 exports.onUserCreate = functions.firestore.document('users/{userId}').onCreate(async (snap, context) => {
   const values = snap.data();
@@ -84,8 +94,6 @@ exports.onPostDelete = functions.firestore.document('posts/{postId}').onDelete(a
   });
   await Promise.all(deletePromises);
 });
-
-
 
 //Obtener todos los usuarios
 userApp.get("/", async (request, response) => {
@@ -149,13 +157,6 @@ exports.user = functions.https.onRequest(userApp);
 
 // const nodemailer = require("nodemailer"); //sirve para crear el transport que se va a encargar de enviar el correo electronico
 // userApp.use(cors({ origin: true }));
-
-
-// //aux function
-// function sendWelcomeMail(email, name) {
-//   return 
-// }
-
 
 // ---------------------------------------------------------------------------------------------------
 
