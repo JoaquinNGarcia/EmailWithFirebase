@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
 
     const signup = (email, password) => {
         return auth.createUserWithEmailAndPassword(email, password);
+        // return auth 
     }
 
     const login = (email, password) => {

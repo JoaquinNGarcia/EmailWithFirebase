@@ -64,6 +64,7 @@ const Dashboard = ( { isTeacherProp } ) => {
             </Card>
             <Form>
                 <div className="mb-1">
+                    <Form.Label> Ingresar un archivo: </Form.Label>
                     <Form.File id="file">
                         <Form.File.Input />
                     </Form.File>

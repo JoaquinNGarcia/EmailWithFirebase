@@ -42,7 +42,7 @@ const Login = () => {
         <>
             <Card>
                 <Card.Body>
-                <h2 className="text-center mb-4"> ¡Inicia sesión en tu cuenta de LanguageApp! </h2>
+                <h5 className="text-center mb-4"> ¡Inicia sesión en tu cuenta de LanguageApp! </h5>
                 { error && <Alert variant="danger">{ error }</Alert> }
                 <Form onSubmit={ handleSubmit }>                    
                     <Form.Group id="email">

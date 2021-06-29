@@ -16,7 +16,6 @@ import {
 } from "react-router-dom";
 import Dashboard from '../Dashboard/dashboard';
 
-// import welcomeMail from "../../../../functions/src/index";
 
 const Signup = () => {
     const emailRef = useRef();
@@ -43,7 +42,6 @@ const Signup = () => {
 			setError("");
 			setLoading(true);
 			await signup(emailRef.current.value, passwordRef.current.value);
-			// await firebase.welcomeMail(emailRef.current.value, passwordRef.current.value)
 			<Dashboard isTeacherProp={ accountType }/>
 			history.push("/");
 		} catch {
