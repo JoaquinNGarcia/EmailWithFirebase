@@ -119,7 +119,7 @@ const Signup = () => {
 							!accountType ?
 								[
 									<Form.Check
-										type="switch"
+										type="radio"
 										id="institute"
 										className="mb-2"
 										label="Instituto"
@@ -128,7 +128,7 @@ const Signup = () => {
 										required
 									/>,
 									<Form.Check
-										type="switch"
+										type="radio"
 										id="teacher"
 										className="mb-2"
 										label="Docente"
@@ -137,7 +137,7 @@ const Signup = () => {
 										required
 									/>,
 									<Form.Check
-										type="switch"
+										type="radio"
 										id="student"
 										className="mb-2"
 										label="Estudiante"

@@ -17,6 +17,7 @@ import moment from 'moment';
 
 const Dashboard = ( { isTeacherProp } ) => {
     const [ error, setError ] = useState("");
+    const [ isLoading, setIsLoading ] = useState(true);
     const { currentUser, logout } = useAuth();
     const history = useHistory();
 

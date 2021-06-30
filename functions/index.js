@@ -1,162 +1,141 @@
 /* eslint-disable */
 const functions = require("firebase-functions");
-const express = require("express");
 const admin = require("firebase-admin");
-admin.initializeApp();
-const authMiddleware = require('./authMiddleware');
-const userApp = express();
-
-userApp.use(authMiddleware);
-
-const db = admin.firestore();
 const nodemailer = require("nodemailer"); //sirve para crear el transport que se va a encargar de enviar el correo electronico
+const express = require("express");
+const cors = require("cors");
+admin.initializeApp();
+const db = admin.firestore();
+const userApp = express();
+userApp.use(cors({ origin: true }));
 
-const mailTransport = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.SENDER_EMAIL,
-    pass: process.env.SENDER_PASSWORD,
-  },
-});
+const {REACT_APP_SENDER_EMAIL, REACT_APP_SENDER_PASSWORD} = process.env;
 
-//cloud function
-exports.welcomeMail = functions.auth.user().onCreate((user) => {
-  const email = user.email;
-  const name = user.name;
-  return sendWelcomeMail(email, name);
-});
+// if (process.env.NODE_ENV != "production") {
+//   require("dotenv").config();
+// }
 
-//aux function
-function sendWelcomeMail(email, name) {
-  return mailTransport.sendMail({
-    from: process.env.SENDER_EMAIL,
-    to: email,
-    subject: "test",
-    html:
-      `<h1>Hola ${name} </h1>
-       <p>Esto es una prueba</p> `,
-  })
-	.then(res => console.log(res))
-	.catch(error => console.log(error) );
-}
-
-// cloud function
-exports.goodbyeEmail = functions.auth.user().onDelete((user) => {
-    const email = user.email;
-    const name = user.name;
-    return sendGoodbyeMail(email, name);
-});
-
-//aux function
-async function sendGoodbyeMail(email, name) {
-    const mailOptions = {
-        from: process.env.SENDER_EMAIL,
-        to: email,
-    };
-    mailOptions.subject = `Adios`
-    mailOptions.text = `test despedida ${ name }`;
-    await mailTransport.sendMail(mailOptions);
-    functions.logger.log('se elimino el email: ', email);
-    return null;
-}
-
-
-exports.helloWorld = functions.https.onRequest((request, response) => {
-  functions.logger.info("Hello logs", {structureData: true});
-  response.send("Hello from Firebase!");
-});
-
-exports.onUserCreate = functions.firestore.document('users/{userId}').onCreate(async (snap, context) => {
-  const values = snap.data();
-  // send email
-  await db.collection('logging').add({ description: `El correo electrónico fue enviado al usuario: ${values.username}` });
-})
-
-exports.onUserUpdate = functions.firestore.document('users/{userId}').onUpdate(async (snap, context) => {
-  const newValues = snap.after.data();
-  const previousValues = snap.before.data();
-  if (newValues.username !== previousValues.username) {
-    const snapshot = await db.collection('reviews').where('username', '==', previousValues.username).get();
-    let updatePromises = [];
-    snapshot.forEach(doc => {
-        updatePromises.push(db.collection('reviews').doc(doc.id).update({ username: newValues.username }));
-    });
-    await Promise.all(updatePromises);
-  }
-})
-
-exports.onPostDelete = functions.firestore.document('posts/{postId}').onDelete(async (snap, context) => {
-  const deletedPost = snap.data();
-  let deletePromises = [];
-  const bucket = admin.storage().bucket();
-  deletedPost.images.forEach(image => {
-      deletePromises.push(bucket.file(image).delete());
-  });
-  await Promise.all(deletePromises);
-});
-
-//Obtener todos los usuarios
-userApp.get("/", async (request, response) => {
-  const snapshot = await db.collection("users").get();
-
-  let users = [];
-  snapshot.forEach((doc) => {
-    let id = doc.id;
-    let data = doc.data();
-
-    users.push({ id, ...data });
-  });
-
-  response.status(200).send(JSON.stringify(users));
-});
-
-//Obtener un usuario en puntual con el id
-userApp.get("/:id", async (request, response) => {
-  const snapshot = await db
-    .collection('users')
-    .doc(request.params.id)
-    .get();
-
-  const userId = snapshot.id;
-  const userData = snapshot.data();
-
-  response.status(200).send(JSON.stringify({id: userId, ...userData}));
-});
-
-//Crea nuevos usuarios
-userApp.post("/", async (request, response) => {
-  
-  const user = request.body;
-
-  await db.collection("users").add(user);
-
-  response.status(201).send();
-});
-
-//Actualiza un usuario puntual
-userApp.put("/:id", async (request, response) => {
-  const body = request.body;
-
-  await db.collection('users').doc(request.params.id).update(body);
-
-  response.status(200).send()
-});
-
-//Borra un usuario puntual
-userApp.delete("/:id", async (request, response) => {
-  await db.collection("users").doc(request.params.id).delete();
-
-  response.status(200).send();
-})
-
-exports.user = functions.https.onRequest(userApp);
-
-// ---------------------------------------------------------------------------------------------------
-// const cors = require("cors");
+// userApp.use(authMiddleware);
+// const authMiddleware = require('./authMiddleware'); //Funciona para el token
 // const { body, validationResult } = require("express-validator");
 
-// const nodemailer = require("nodemailer"); //sirve para crear el transport que se va a encargar de enviar el correo electronico
-// userApp.use(cors({ origin: true }));
+// exports.onUserCreate = functions.firestore.document('users/{userId}').onCreate(async (snap, context) => {
+//   const values = snap.data();
+//   // send email
+//   await db.collection('logging').add({ description: `El correo electrónico fue enviado al usuario: ${values.username}` });
+// })
+
+// exports.onUserUpdate = functions.firestore.document('users/{userId}').onUpdate(async (snap, context) => {
+//   const newValues = snap.after.data();
+//   const previousValues = snap.before.data();
+//   if (newValues.username !== previousValues.username) {
+//     const snapshot = await db.collection('reviews').where('username', '==', previousValues.username).get();
+//     let updatePromises = [];
+//     snapshot.forEach(doc => {
+//         updatePromises.push(db.collection('reviews').doc(doc.id).update({ username: newValues.username }));
+//     });
+//     await Promise.all(updatePromises);
+//   }
+// })
+
+// exports.onPostDelete = functions.firestore.document('posts/{postId}').onDelete(async (snap, context) => {
+//   const deletedPost = snap.data();
+//   let deletePromises = [];
+//   const bucket = admin.storage().bucket();
+//   deletedPost.images.forEach(image => {
+//       deletePromises.push(bucket.file(image).delete());
+//   });
+//   await Promise.all(deletePromises);
+// });
+
+//Crea nuevos usuarios
+userApp.post("/", (request, response) => {
+  const { body } = request;
+  const isValidMessage = body.message && body.to && body.subject;
+
+  !isValidMessage && response.status(400).send({ message: "invalid request" });
+
+  const mailTransport = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: REACT_APP_SENDER_EMAIL,
+      pass: REACT_APP_SENDER_PASSWORD,
+    }
+  });
+
+  const mailOptions = {
+    from: REACT_APP_SENDER_EMAIL,
+    to: body.to,
+    subject: body.subject,
+    text: body.message
+  };
+
+  mailTransport.sendMail(mailOptions, (err, data) => {
+    if (err) {
+      return response.status(500).send({ message: "error " + err.message });
+    }
+    return response.send({ message: "email sent" });
+  });
+});
+
+module.exports.mailer = functions.https.onRequest(userApp);
+
+// //Obtener todos los usuarios
+// userApp.get("/", async (request, response) => {
+//   const snapshot = await db.collection("users").get();
+
+//   let users = [];
+//   snapshot.forEach((doc) => {
+//     let id = doc.id;
+//     let data = doc.data();
+
+//     users.push({ id, ...data });
+//   });
+
+//   response.status(200).send(JSON.stringify(users));
+// });
+
+// //Obtener un usuario en puntual con el id
+// userApp.get("/:id", async (request, response) => {
+//   const snapshot = await db
+//     .collection('users')
+//     .doc(request.params.id)
+//     .get();
+
+//   const userId = snapshot.id;
+//   const userData = snapshot.data();
+
+//   response.status(200).send(JSON.stringify({id: userId, ...userData}));
+// });
+
+// //Actualiza un usuario puntual
+// userApp.put("/:id", async (request, response) => {
+//   const body = request.body;
+  
+//   await db.collection('users').doc(request.params.id).update(body);
+  
+//   response.status(200).send()
+// });
+
+// //Borra un usuario puntual
+// userApp.delete("/:id", async (request, response) => {
+//   await db.collection("users").doc(request.params.id).delete();
+  
+//   response.status(200).send();
+// })
+
+// exports.user = functions.https.onRequest(userApp);
+
+// ---------------------------------------------------------------------------------------------------
+// //Crea nuevos usuarios
+// userApp.post("/", async (request, response) => {
+  
+//   const user = request.body;
+
+//   await db.collection("users").add(user);
+
+//   response.status(201).send();
+// });
 
 // ---------------------------------------------------------------------------------------------------
 
@@ -193,8 +172,8 @@ exports.user = functions.https.onRequest(userApp);
 // const mailTransport = nodemailer.createTransport({
 //   service: "gmail",
 //   auth: {
-//     user: process.env.SENDER_EMAIL,
-//     pass: process.env.SENDER_PASSWORD,
+//     user: REACT_APP_SENDER_EMAIL,
+//     pass: REACT_APP_SENDER_PASSWORD,
 //   },
 // });
 
@@ -267,7 +246,7 @@ exports.user = functions.https.onRequest(userApp);
 // const nodemailer = require("nodemailer"); //sirve para crear el transport que se va a encargar de enviar el correo electronico
 // require("dotenv").config();
 
-// const {SENDER_EMAIL, SENDER_PASSWORD} = process.env;
+// const {REACT_APP_SENDER_EMAIL, REACT_APP_SENDER_PASSWORD} = process.env;
 
 // exports.sendEmailNotification=functions
 //     .firestore
@@ -279,8 +258,8 @@ exports.user = functions.https.onRequest(userApp);
 //         port: 465,
 //         secure: true,
 //         auth: {
-//           user: SENDER_EMAIL,
-//           pass: SENDER_PASSWORD,
+//           user: REACT_APP_SENDER_EMAIL,
+//           pass: REACT_APP_SENDER_PASSWORD,
 //         },
 //       });
 //       authData.sendMail({
@@ -308,15 +287,72 @@ exports.user = functions.https.onRequest(userApp);
 
 // ---------------------------------------------------------------------------------------------------
 
+// exports.helloWorld = functions.https.onRequest((request, response) => {
+//   functions.logger.info("Hello logs", {structureData: true});
+//   response.send("Hello from Firebase!");
+// });
 
 // ---------------------------------------------------------------------------------------------------
 
+// exports.welcomeMail = functions.firestore.document('users/{userId}').onCreate(( snap ) => {
+//   const { email } = user;
+//   return sendWelcomeMail(email);
+// });
 
+// function sendWelcomeMail(email) {
+//   return mailTransport.sendMail({
+//     from: 'languageAppTest@languageApp.com',
+//     to: email,
+//   })
+//   .then( res=> res)
+//   .catch( error => error);
+// }
 
 
 // ---------------------------------------------------------------------------------------------------
 
+// const mailTransport = nodemailer.createTransport({
+//   service: 'Gmail',
+//   auth: {
+//     user: REACT_APP_SENDER_EMAIL,
+//     pass: REACT_APP_SENDER_PASSWORD,
+//   }
+// });
 
+// // cloud function
+// exports.welcomeMail = functions.auth.user().onCreate((user) => {
+//   const { email } = user;
+//   async function sendWelcomeMail(email) {
+//     const mailDetails = {
+//       from: REACT_APP_SENDER_EMAIL,
+//       to: email,
+//       subject: "test",
+//       html:
+//         `<h1>Hola </h1>
+//         <p>Esto es una prueba</p> `,
+//     };
+//     await mailTransport.sendMail(mailDetails);
+//     functions.logger.log('Nuevo email enviado a:', email);
+//   }
+//   return null;
+// });
+
+
+// // cloud function
+// exports.goodbyeEmail = functions.auth.user().onDelete((user) => {
+//   const { email, name } = user;
+//   async function sendGoodbyeMail(email) {
+//     const mailOptions = {
+//         from: REACT_APP_SENDER_EMAIL,
+//         to: email,
+//         subject: `Adios`,
+//     };
+//     await mailTransport.sendMail(mailOptions);
+//     functions.logger.log('se elimino el email: ', email);
+//     return null;
+// }
+
+// } );
 
 // ---------------------------------------------------------------------------------------------------
 
