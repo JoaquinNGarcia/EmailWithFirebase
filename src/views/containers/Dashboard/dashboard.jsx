@@ -15,9 +15,13 @@ import {
 } from "react-router-dom";
 import moment from 'moment';
 
+import HomeworkList from '../HomeworkList/HomeworkList';
+
+// import shortid from 'shortid' //https://www.npmjs.com/package/shortid
+
 const Dashboard = ( { isTeacherProp } ) => {
     const [ error, setError ] = useState("");
-    const [ isLoading, setIsLoading ] = useState(true);
+    // const [ isLoading, setIsLoading ] = useState(true);
     const { currentUser, logout } = useAuth();
     const history = useHistory();
 
@@ -32,7 +36,6 @@ const Dashboard = ( { isTeacherProp } ) => {
 
     async function handleLogout() {
         setError("");
-
         try {
             await logout();
             history.push("/login");
@@ -41,13 +44,12 @@ const Dashboard = ( { isTeacherProp } ) => {
         }
     }
 
-
     return (
         <>
             {/* { console.log('props: ', props) } */}
             { console.log('isTeacherProp: ', isTeacherProp) }
             
-            <Card>
+            <div className="w-100">
                 <Card.Body>
                     { console.log('currentUser: ', currentUser) }
                     <h2 className="text-center mb-4"> Perfil </h2>
@@ -56,20 +58,28 @@ const Dashboard = ( { isTeacherProp } ) => {
                         { `${ greet }` }
                     </strong>
                     {`, ${ currentUser.email }` }
+                    <hr/>
                     <strong> Email: </strong>
                     { currentUser.email }
                     <Link to="/updateProfile" className="btn btn-info w-100 mt-3">
                         Actualizar perfil
                     </Link>
                 </Card.Body>
-            </Card>
+                    <HomeworkList email={ currentUser.email } />
+            </div>
+        
+            
             <Form>
-                <div className="mb-1">
-                    <Form.Label> Ingresar un archivo: </Form.Label>
-                    <Form.File id="file">
-                        <Form.File.Input />
-                    </Form.File>
-                </div>
+                {
+                    currentUser.email === "profesor@gmail.com" &&
+                        <div className="mt-5">
+                            <Form.Label> Ingresar un archivo: </Form.Label>
+                            <Form.File id="file">
+                                <Form.File.Input />
+                            </Form.File>
+                        </div>
+                }
+                
             </Form>
 
             <div className="w-100 text-center mt-2">

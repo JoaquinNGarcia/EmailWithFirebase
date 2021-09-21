@@ -1,5 +1,6 @@
 import React,
 	{
+		useEffect,
 		useRef,
 		useState
 	} from 'react';
@@ -15,14 +16,14 @@ import {
 	useHistory
 } from "react-router-dom";
 import Dashboard from '../Dashboard/dashboard';
-
+// import { postMailer } from '../../service/shared/onUserCreate.service'
 
 const Signup = () => {
     const emailRef = useRef();
     const passwordRef = useRef();
     const passwordConfirmRef = useRef();
 	// const isTeacherRef = useRef();
-	
+
     const { signup } = useAuth();
     const [ error, setError ] = useState("");
     const [ loading, setLoading ] = useState(false);
@@ -30,10 +31,42 @@ const Signup = () => {
 	const [ accountId, setAccountId ] = useState('')
     const history = useHistory();
 
+	// const [ postId, setPostId ] = useState(null);
+	// const [ errorMessage, setErrorMessage ] = useState(null);
+
+	useEffect( () => {
+		const requestOptions = {
+			method: 'POST',
+			body: {
+				to: emailRef.current.value,
+				message: "Bienvenido de nuevo",
+				subject: "LanguageApp"
+			}
+		};
+		fetch('http://localhost:5001/languageapp-4985f/us-central1/mailer', requestOptions )
+			.then(async response => {
+				const data = await response.json();
+				if(!response.ok) { 
+					return Promise.reject( (data && data.message) || response.status ) //error
+				}
+				// setPostId(data.id);
+			})
+			.catch( error => {
+				// setErrorMessage(error.toString());
+				console.log('Error: ', error);
+			});
+		// async function signupUser() {
+		// 	const response = await postMailer();
+		// 	response.status === 200 &&
+		// 		console.log('response: ', response);
+		// }
+		// signupUser()
+	}, [ ]);
+
 	async function handleSubmit(e) {
 		e.preventDefault();
 
-		// passwordRef.current.value !== passwordConfirmRef.current.value && setError("Las contraseñas no coinciden.");
+		passwordRef.current.value !== passwordConfirmRef.current.value && setError("Las contraseñas no coinciden.");
 		if (passwordRef.current.value !== passwordConfirmRef.current.value) {
 			return setError("Las contraseñas no coinciden.")
 		}
@@ -148,7 +181,7 @@ const Signup = () => {
 								] : accountId === 'institute' && accountId !== 'teacher' && accountId !== 'student' ?
 								[
 									<Form.Check
-										type="switch"
+										type="radio"
 										id="institute"
 										className="mb-2"
 										label="Instituto"
@@ -157,7 +190,7 @@ const Signup = () => {
 										checked
 									/>,
 									<Form.Check
-										type="switch"
+										type="radio"
 										id="teacher"
 										className="mb-2"
 										label="Docente"
@@ -165,7 +198,7 @@ const Signup = () => {
 										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
 									/>,
 									<Form.Check
-										type="switch"
+										type="radio"
 										id="student"
 										className="mb-2"
 										label="Estudiante"
@@ -175,7 +208,7 @@ const Signup = () => {
 								] :  accountId !== 'institute' && accountId === 'teacher' && accountId !== 'student' ?
 								[
 									<Form.Check
-										type="switch"
+										type="radio"
 										id="institute"
 										className="mb-2"
 										label="Instituto"
@@ -183,7 +216,7 @@ const Signup = () => {
 										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
 									/>,
 									<Form.Check
-										type="switch"
+										type="radio"
 										id="teacher"
 										className="mb-2"
 										label="Docente"
@@ -192,7 +225,7 @@ const Signup = () => {
 										checked
 									/>,
 									<Form.Check
-										type="switch"
+										type="radio"
 										id="student"
 										className="mb-2"
 										label="Estudiante"
@@ -202,7 +235,7 @@ const Signup = () => {
 								] :  accountId !== 'institute' && accountId !== 'teacher' && accountId === 'student' &&
 								[
 									<Form.Check
-										type="switch"
+										type="radio"
 										id="institute"
 										className="mb-2"
 										label="Instituto"
@@ -210,7 +243,7 @@ const Signup = () => {
 										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
 									/>,
 									<Form.Check
-										type="switch"
+										type="radio"
 										id="teacher"
 										className="mb-2"
 										label="Docente"
@@ -218,7 +251,7 @@ const Signup = () => {
 										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
 									/>,
 									<Form.Check
-										type="switch"
+										type="radio"
 										id="student"
 										className="mb-2"
 										label="Estudiante"

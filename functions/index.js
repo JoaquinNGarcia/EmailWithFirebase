@@ -9,48 +9,45 @@ const db = admin.firestore();
 const userApp = express();
 userApp.use(cors({ origin: true }));
 
-const {REACT_APP_SENDER_EMAIL, REACT_APP_SENDER_PASSWORD} = process.env;
+const REACT_APP_SENDER_EMAIL="joaquingarcia7596@gmail.com"
+const REACT_APP_SENDER_PASSWORD="j39290658garcia7"
 
-// if (process.env.NODE_ENV != "production") {
-//   require("dotenv").config();
-// }
+if (process.env.NODE_ENV != "production") {
+  require("dotenv").config();
+}
 
-// userApp.use(authMiddleware);
-// const authMiddleware = require('./authMiddleware'); //Funciona para el token
-// const { body, validationResult } = require("express-validator");
+exports.onUserCreate = functions.firestore.document('users/{userId}').onCreate(async (snap, context) => {
+  const values = snap.data();
+  await db.collection('logging').add({ description: `El correo electrónico fue enviado al usuario: ${values.username}` });
+})
 
-// exports.onUserCreate = functions.firestore.document('users/{userId}').onCreate(async (snap, context) => {
-//   const values = snap.data();
-//   // send email
-//   await db.collection('logging').add({ description: `El correo electrónico fue enviado al usuario: ${values.username}` });
-// })
+exports.onUserUpdate = functions.firestore.document('users/{userId}').onUpdate(async (snap, context) => {
+  const newValues = snap.after.data();
+  const previousValues = snap.before.data();
+  if (newValues.username !== previousValues.username) {
+    const snapshot = await db.collection('reviews').where('username', '==', previousValues.username).get();
+    let updatePromises = [];
+    snapshot.forEach(doc => {
+        updatePromises.push(db.collection('reviews').doc(doc.id).update({ username: newValues.username }));
+    });
+    await Promise.all(updatePromises);
+  }
+})
 
-// exports.onUserUpdate = functions.firestore.document('users/{userId}').onUpdate(async (snap, context) => {
-//   const newValues = snap.after.data();
-//   const previousValues = snap.before.data();
-//   if (newValues.username !== previousValues.username) {
-//     const snapshot = await db.collection('reviews').where('username', '==', previousValues.username).get();
-//     let updatePromises = [];
-//     snapshot.forEach(doc => {
-//         updatePromises.push(db.collection('reviews').doc(doc.id).update({ username: newValues.username }));
-//     });
-//     await Promise.all(updatePromises);
-//   }
-// })
+exports.onPostDelete = functions.firestore.document('posts/{postId}').onDelete(async (snap, context) => {
+  const deletedPost = snap.data();
+  let deletePromises = [];
+  const bucket = admin.storage().bucket();
+  deletedPost.images.forEach(image => {
+      deletePromises.push(bucket.file(image).delete());
+  });
+  await Promise.all(deletePromises);
+});
 
-// exports.onPostDelete = functions.firestore.document('posts/{postId}').onDelete(async (snap, context) => {
-//   const deletedPost = snap.data();
-//   let deletePromises = [];
-//   const bucket = admin.storage().bucket();
-//   deletedPost.images.forEach(image => {
-//       deletePromises.push(bucket.file(image).delete());
-//   });
-//   await Promise.all(deletePromises);
-// });
-
-//Crea nuevos usuarios
-userApp.post("/", (request, response) => {
+//Crea nuevos usuarios y les envia un mail
+userApp.post("/", async (request, response) => {
   const { body } = request;
+  const user = body;
   const isValidMessage = body.message && body.to && body.subject;
 
   !isValidMessage && response.status(400).send({ message: "invalid request" });
@@ -64,7 +61,7 @@ userApp.post("/", (request, response) => {
   });
 
   const mailOptions = {
-    from: REACT_APP_SENDER_EMAIL,
+    from: "LanguageApp@mail.com",
     to: body.to,
     subject: body.subject,
     text: body.message
@@ -72,61 +69,71 @@ userApp.post("/", (request, response) => {
 
   mailTransport.sendMail(mailOptions, (err, data) => {
     if (err) {
-      return response.status(500).send({ message: "error " + err.message });
+      return response.status(500).send({ message: "Error: " + err.message + "data: " + data });
     }
     return response.send({ message: "email sent" });
   });
+
+  await db.collection("users").add(user);
+  response.status(201).send({ message: "Created" });
 });
 
-module.exports.mailer = functions.https.onRequest(userApp);
+//Obtener todos los usuarios
+userApp.get("/", async (request, response) => {
+  const snapshot = await db.collection("users").get();
 
-// //Obtener todos los usuarios
-// userApp.get("/", async (request, response) => {
-//   const snapshot = await db.collection("users").get();
+  let users = [];
+  snapshot.forEach((doc) => {
+    let id = doc.id;
+    let data = doc.data();
 
-//   let users = [];
-//   snapshot.forEach((doc) => {
-//     let id = doc.id;
-//     let data = doc.data();
+    users.push({ id, ...data });
+  });
 
-//     users.push({ id, ...data });
-//   });
+  response.status(200).send(JSON.stringify(users));
+});
 
-//   response.status(200).send(JSON.stringify(users));
-// });
+//Obtener un usuario en puntual con el id
+userApp.get("/:id", async (request, response) => {
+  const snapshot = await db
+    .collection('users')
+    .doc(request.params.id)
+    .get();
 
-// //Obtener un usuario en puntual con el id
-// userApp.get("/:id", async (request, response) => {
-//   const snapshot = await db
-//     .collection('users')
-//     .doc(request.params.id)
-//     .get();
+  const userId = snapshot.id;
+  const userData = snapshot.data();
 
-//   const userId = snapshot.id;
-//   const userData = snapshot.data();
+  response.status(200).send(JSON.stringify({id: userId, ...userData}));
+});
 
-//   response.status(200).send(JSON.stringify({id: userId, ...userData}));
-// });
-
-// //Actualiza un usuario puntual
-// userApp.put("/:id", async (request, response) => {
-//   const body = request.body;
+//Actualiza un usuario puntual
+userApp.put("/:id", async (request, response) => {
+  const body = request.body;
   
-//   await db.collection('users').doc(request.params.id).update(body);
+  await db.collection('users').doc(request.params.id).update(body);
   
-//   response.status(200).send()
-// });
+  response.status(200).send()
+});
 
-// //Borra un usuario puntual
-// userApp.delete("/:id", async (request, response) => {
-//   await db.collection("users").doc(request.params.id).delete();
+//Borra un usuario puntual
+userApp.delete("/:id", async (request, response) => {
+  await db.collection("users").doc(request.params.id).delete();
   
-//   response.status(200).send();
-// })
+  response.status(200).send();
+})
 
-// exports.user = functions.https.onRequest(userApp);
+exports.user = functions.https.onRequest(userApp);
 
 // ---------------------------------------------------------------------------------------------------
+
+// userApp.use(authMiddleware);
+// const authMiddleware = require('./authMiddleware'); //Funciona para el token
+// const { body, validationResult } = require("express-validator");
+
+// ---------------------------------------------------------------------------------------------------
+
+// exports.mailer = functions.https.onRequest(userApp);
+
 // //Crea nuevos usuarios
 // userApp.post("/", async (request, response) => {
   
