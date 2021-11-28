@@ -1,4 +1,7 @@
-import React from 'react';
+import React, {
+	useEffect,
+	useState
+} from 'react';
 import { Container } from "react-bootstrap";
 import { AuthProvider } from "../contexts/authContext";
 import {
@@ -7,12 +10,16 @@ import {
 	Route
 	// Link
 } from "react-router-dom";
+import Navbar from '../containers/Navbar/navbar';
+// import Admin from '../containers/Admin/admin'
 import Signup from "../containers/Signup/signup";
 import Dashboard from "../containers/Dashboard/dashboard";
 import Login from "../containers/Login/login";
 import PrivateRoute from "../containers/PrivateRoute/privateRoute";
 import ForgotPassword from "../containers/ForgotPassword/forgotPassword";
 import UpdateProfile from "../containers/UpdateProfile/updateProfile";
+
+import { auth } from '../../config/firebaseApp';
 
 // import firebaseApp from './config/firebaseApp';
 // import Login from './Login'; //login sin diseño
@@ -22,25 +29,42 @@ import UpdateProfile from "../containers/UpdateProfile/updateProfile";
 // import { FacebookLoginButton } from 'react-social-login-buttons';
 
 const App = () => {
+	const [firebaseUser, setFirebaseUser] = useState(true);
+
+	useEffect(() => {
+		auth.onAuthStateChanged(user => {
+			console.log('App - user: ', user);
+			user ? setFirebaseUser(user) : setFirebaseUser(null);
+		})
+	}, [])
 	return (
-		<Container
-			className="d-flex align-items-center justify-content-center"
-			style={{ minHeight: "100vh" }} >		
-			{/* <div className="w-100" style={{ maxWidth: "400px" }}> */}
-			<div className="w-100" style={{ maxWidth: "inherit" }}>
+		firebaseUser !== false ? (
+			<div className="d-inherit w-180" style={{ maxWidth: "center" }}>
 				<Router>
-			 		<AuthProvider>
-						<Switch>
-							<Route path="/signup" component={ Signup } />
-							<Route path="/login" component={ Login } />
-							<Route path="/forgotPassword" component={ ForgotPassword } />
-							<PrivateRoute path="/updateProfile" component={ UpdateProfile } />
-							<PrivateRoute exact path="/" component={ Dashboard } />
-						</Switch>
-					</AuthProvider>
+					<Navbar firebaseUser={firebaseUser}/>
+					<Container
+						className="d-flex align-items-center justify-content-center"
+						style={{ minHeight: "100vh" }} >		
+						{/* <div className="w-100" style={{ maxWidth: "400px" }}> */}
+						<AuthProvider>
+							<Switch>
+								<Route path="/signup" component={ Signup } />
+								<Route path="/login" component={ Login } />
+								{/* <Route path="/admin" component={ Admin } /> */}
+								<Route path="/forgotPassword" component={ ForgotPassword } />
+								<PrivateRoute path="/updateProfile" component={ UpdateProfile } />
+								<PrivateRoute exact path="/" component={ Dashboard } />
+							</Switch>
+						</AuthProvider>
+						{/* </div> */}
+					</Container>
 				</Router>
-			</div>		
-		</Container>
+			</div>
+		) : (
+			<div>
+				Cargando...
+			</div>
+		)
 	)
 }
 

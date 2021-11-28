@@ -8,7 +8,8 @@ import {
 	Alert,
 	Button,
 	Card,
-	Form
+	Form,
+	FormGroup
 } from "react-bootstrap";
 import { useAuth } from "../../contexts/authContext";
 import {
@@ -16,6 +17,8 @@ import {
 	useHistory
 } from "react-router-dom";
 import Dashboard from '../Dashboard/dashboard';
+// import { db } from '../../../config/firebaseApp';
+
 // import { postMailer } from '../../service/shared/onUserCreate.service'
 
 const Signup = () => {
@@ -25,10 +28,11 @@ const Signup = () => {
 	// const isTeacherRef = useRef();
 
     const { signup } = useAuth();
-    const [ error, setError ] = useState("");
+    const [ error, setError ] = useState('');
     const [ loading, setLoading ] = useState(false);
-	const [ accountType, setAccountType ] = useState(false);
-	const [ accountId, setAccountId ] = useState('')
+	const [ selectedAccountType, setSelectedAccountType ] = useState(false);
+	const [ accountProfile, setAccountProfile ] = useState('');
+	const [ associatedEmail, setAssociatedEmail ] = useState('');
     const history = useHistory();
 
 	// const [ postId, setPostId ] = useState(null);
@@ -46,7 +50,7 @@ const Signup = () => {
 		fetch('http://localhost:5001/languageapp-4985f/us-central1/mailer', requestOptions )
 			.then(async response => {
 				const data = await response.json();
-				if(!response.ok) { 
+				if(!response.ok) {
 					return Promise.reject( (data && data.message) || response.status ) //error
 				}
 				// setPostId(data.id);
@@ -61,31 +65,63 @@ const Signup = () => {
 		// 		console.log('response: ', response);
 		// }
 		// signupUser()
-	}, [ ]);
+	}, []);
 
 	async function handleSubmit(e) {
 		e.preventDefault();
 
 		passwordRef.current.value !== passwordConfirmRef.current.value && setError("Las contraseñas no coinciden.");
 		if (passwordRef.current.value !== passwordConfirmRef.current.value) {
-			return setError("Las contraseñas no coinciden.")
+			return setError("Las contraseñas no coinciden.");
 		}
 
 		try {
-			setError("");
+			setError('');
 			setLoading(true);
-			await signup(emailRef.current.value, passwordRef.current.value);
-			<Dashboard isTeacherProp={ accountType }/>
+			// setAssociatedEmail(teacherAssociateEmail);
+			// console.log('associatedEmail: ', associatedEmail);
+			// console.log('accountProfile: ', accountProfile );
+			// const res = !!accountProfile
+			// 	? 
+				await signup(emailRef.current.value, passwordRef.current.value);
+				// : setError("Seleccione el tipo de cuenta.");
+			// console.log('res.user:', res.user);
+			
+			// await db.collection('user').doc(res.user.email).set({
+			// 	email: res.user.email,
+			// 	uid: res.user.uid,
+			// 	accountProfile,
+			// 	associatedEmail
+			// });
+			
+			// await db.collection(res.user.uid).add({
+			// 	name: 'ejemplo',
+			// 	fecha: Date.now()
+			// });
+
+			<Dashboard isTeacherProp={ selectedAccountType }/>
 			history.push("/");
-		} catch {
-			setError("No se pudo crear una cuenta.");
+		} catch (error) {
+			console.log('Signup (handleSubmit) - error: ', error);
+
+			error.code === 'auth/weak-password' &&
+                setError("Contraseña débil - Ingrese 6 o mas caracteres.");
+
+			error.code === 'auth/invalid-email' &&
+                setError('Email no válido')
+            
+            error.code === 'auth/email-already-in-use' &&
+                setError('Email ya utilizado')
+            
+
+			// setError("No se pudo crear una cuenta.");
 		}
 		setLoading(false);
 	}
 
 	const handleAccount = (checked, id) => {
-		setAccountType(checked)
-		setAccountId(id);
+		setSelectedAccountType(checked);
+		setAccountProfile(id);
 	}
 
     return (
@@ -95,6 +131,131 @@ const Signup = () => {
 					<h2 className="text-center mb-4"> Inscribirse </h2>
 					{ error && <Alert variant="danger"> { error } </Alert> }
 					<Form onSubmit={ handleSubmit }>
+						<Form.Label>
+							Seleccioná tu cuenta:
+						</Form.Label>
+						{
+							!selectedAccountType ?
+								[
+									<Form.Check
+										type="radio"
+										id="institute"
+										className="mb-2"
+										label="Instituto"
+										block
+										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
+										required
+									/>,
+									<Form.Check
+										type="radio"
+										id="teacher"
+										className="mb-2"
+										label="Docente"
+										block
+										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
+										required
+									/>,
+									<Form.Check
+										type="radio"
+										id="student"
+										className="mb-2"
+										label="Estudiante"
+										block
+										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
+										required
+									/>
+								] : accountProfile === 'institute' && accountProfile !== 'teacher' && accountProfile !== 'student' ?
+								[
+									<Form.Check
+										type="radio"
+										id="institute"
+										className="mb-2"
+										label="Instituto"
+										block
+										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
+										required
+										checked
+									/>,
+									<Form.Check
+										type="radio"
+										id="teacher"
+										className="mb-2"
+										label="Docente"
+										block
+										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
+										required
+									/>,
+									<Form.Check
+										type="radio"
+										id="student"
+										className="mb-2"
+										label="Estudiante"
+										block
+										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
+										required
+									/>
+								] :  accountProfile !== 'institute' && accountProfile === 'teacher' && accountProfile !== 'student' ?
+								[
+									<Form.Check
+										type="radio"
+										id="institute"
+										className="mb-2"
+										label="Instituto"
+										block
+										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
+										required
+									/>,
+									<Form.Check
+										type="radio"
+										id="teacher"
+										className="mb-2"
+										label="Docente"
+										block
+										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
+										required
+										checked
+									/>,
+									<Form.Check
+										type="radio"
+										id="student"
+										className="mb-2"
+										label="Estudiante"
+										block
+										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
+										required
+									/>
+								] :  accountProfile !== 'institute' && accountProfile !== 'teacher' && accountProfile === 'student' &&
+								[
+									<Form.Check
+										type="radio"
+										id="institute"
+										className="mb-2"
+										label="Instituto"
+										block
+										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
+										required
+									/>,
+									<Form.Check
+										type="radio"
+										id="teacher"
+										className="mb-2"
+										label="Docente"
+										block
+										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
+										required
+									/>,
+									<Form.Check
+										type="radio"
+										id="student"
+										className="mb-2"
+										label="Estudiante"
+										block
+										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
+										checked
+										required
+									/>
+								]
+						}
 						<Form.Group id="name">
 							<Form.Label> Nombre </Form.Label>
 							<Form.Control
@@ -118,7 +279,18 @@ const Signup = () => {
 								required
 							/>
 						</Form.Group>
-
+						{	
+							accountProfile === 'student' &&
+								<Form.Group id="teacherAssociateEmail">
+									<Form.Label> Correo electronico del profesor asociado </Form.Label>
+									<Form.Control
+										type="email"
+										onChange={e => setAssociatedEmail(e.target.value)}
+										name="title"
+										required
+										/>
+								</Form.Group>
+						}
 						<Form.Group id="email">
 							<Form.Label> Email </Form.Label>
 							<Form.Control
@@ -145,122 +317,7 @@ const Signup = () => {
 								required
 							/>
 						</Form.Group>
-						<Form.Label>
-							Seleccioná tu cuenta:
-						</Form.Label>
-						{
-							!accountType ?
-								[
-									<Form.Check
-										type="radio"
-										id="institute"
-										className="mb-2"
-										label="Instituto"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-										required
-									/>,
-									<Form.Check
-										type="radio"
-										id="teacher"
-										className="mb-2"
-										label="Docente"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
-										required
-									/>,
-									<Form.Check
-										type="radio"
-										id="student"
-										className="mb-2"
-										label="Estudiante"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-										required
-									/>
-								] : accountId === 'institute' && accountId !== 'teacher' && accountId !== 'student' ?
-								[
-									<Form.Check
-										type="radio"
-										id="institute"
-										className="mb-2"
-										label="Instituto"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-										checked
-									/>,
-									<Form.Check
-										type="radio"
-										id="teacher"
-										className="mb-2"
-										label="Docente"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
-									/>,
-									<Form.Check
-										type="radio"
-										id="student"
-										className="mb-2"
-										label="Estudiante"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-									/>
-								] :  accountId !== 'institute' && accountId === 'teacher' && accountId !== 'student' ?
-								[
-									<Form.Check
-										type="radio"
-										id="institute"
-										className="mb-2"
-										label="Instituto"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-									/>,
-									<Form.Check
-										type="radio"
-										id="teacher"
-										className="mb-2"
-										label="Docente"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
-										checked
-									/>,
-									<Form.Check
-										type="radio"
-										id="student"
-										className="mb-2"
-										label="Estudiante"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-									/>
-								] :  accountId !== 'institute' && accountId !== 'teacher' && accountId === 'student' &&
-								[
-									<Form.Check
-										type="radio"
-										id="institute"
-										className="mb-2"
-										label="Instituto"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-									/>,
-									<Form.Check
-										type="radio"
-										id="teacher"
-										className="mb-2"
-										label="Docente"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
-									/>,
-									<Form.Check
-										type="radio"
-										id="student"
-										className="mb-2"
-										label="Estudiante"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-										checked
-									/>
-								]
-						}
+						
 						<Button disable={ loading } className="w-100 btn-info mt-3" type="submit" >
 							Inscribirse
 						</Button>

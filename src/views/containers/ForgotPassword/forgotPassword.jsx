@@ -17,20 +17,21 @@ import {
 const ForgotPassword = () => {
     const emailRef = useRef();
     const { resetPassword } = useAuth();
-    const [ error, setError ] = useState("");
-    const [ message, setMessage ] = useState("");
+    const [ error, setError ] = useState(null);
+    const [ message, setMessage ] = useState('');
     const [ loading, setLoading ] = useState(false);
     
     async function handleSubmit(e) {
         e.preventDefault();
 
         try {
-            setMessage("");
-            setError("");
+            setMessage('');
+            setError('');
             setLoading(true);
             await resetPassword(emailRef.current.value);
             setMessage("Revisa tu correo para más instrucciones.");
-        } catch {
+        } catch (error) {
+            console.log('ForgotPassword (handleSubmit) - error: ', error);
             setError("No se pudo restablecer la contraseña.");
         }
         setLoading(false);

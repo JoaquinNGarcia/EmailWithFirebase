@@ -1,5 +1,6 @@
 import React,
 	{
+        useEffect,
 		useState
 	} from 'react';
 import {
@@ -14,17 +15,37 @@ import {
 	useHistory
 } from "react-router-dom";
 import moment from 'moment';
-
-import HomeworkList from '../HomeworkList/HomeworkList';
-
+import HomeworkList from '../HomeworkList/homeworkList';
+import { auth, db } from '../../../config/firebaseApp';
 // import shortid from 'shortid' //https://www.npmjs.com/package/shortid
 
 const Dashboard = ( { isTeacherProp } ) => {
-    const [ error, setError ] = useState("");
+    const [ error, setError ] = useState('');
+    const [ user, setUser ] = useState(null);
+    const [ profile, setProfile ] = useState([]);
     // const [ isLoading, setIsLoading ] = useState(true);
     const { currentUser, logout } = useAuth();
     const history = useHistory();
 
+    useEffect(() => {
+        auth.currentUser
+            ? setUser(auth.currentUser)
+            : history.push('/login');
+
+        // const obtenerDatos = async () => {
+        //     try {
+        //         const dataProfile = await db.collection('user').get();
+        //         const arrayDataProfile = dataProfile.docs.map(doc => ({ id: doc.id, ...doc.data() })) //...doc.data() <- Opererador de propagacion
+                
+        //         setProfile( arrayDataProfile );
+        //         // console.log('arrayDataProfile: ', arrayDataProfile);
+        //     } catch (error) {
+        //         console.log('Dashboard (obtenerDatos) - error: ', error);
+        //     }
+        // }
+        // obtenerDatos();
+
+    }, [history]);
 
     const time = moment().format('HH:mm');
     const greet = ( time >= '06:00') && ( time < '13:00')
@@ -33,13 +54,13 @@ const Dashboard = ( { isTeacherProp } ) => {
             ? 'Buenas tardes'
             : 'Buenas noches';
 
-
     async function handleLogout() {
-        setError("");
+        setError('');
         try {
             await logout();
-            history.push("/login");
-        } catch {
+            history.push('/login');
+        } catch (error) {
+            console.log('Dashboard (handleLogout) - error: ', error);
             setError("No se pudo cerrar la sesión.");
         }
     }
@@ -47,11 +68,11 @@ const Dashboard = ( { isTeacherProp } ) => {
     return (
         <>
             {/* { console.log('props: ', props) } */}
-            { console.log('isTeacherProp: ', isTeacherProp) }
-            
+            {/* { console.log('isTeacherProp: ', isTeacherProp) } */}
+
             <div className="w-100">
                 <Card.Body>
-                    { console.log('currentUser: ', currentUser) }
+                    {/* { console.log('currentUser: ', currentUser) } */}
                     <h2 className="text-center mb-4"> Perfil </h2>
                     { error && <Alert variant="danger"> { error } </Alert> }
                     <strong>
@@ -65,21 +86,36 @@ const Dashboard = ( { isTeacherProp } ) => {
                         Actualizar perfil
                     </Link>
                 </Card.Body>
-                    <HomeworkList email={ currentUser.email } />
+                    {
+                        user && (
+                            <HomeworkList user={ user } profile={ profile }/>
+                        )
+                    }
             </div>
-        
-            
+
             <Form>
                 {
-                    currentUser.email === "profesor@gmail.com" &&
-                        <div className="mt-5">
-                            <Form.Label> Ingresar un archivo: </Form.Label>
-                            <Form.File id="file">
-                                <Form.File.Input />
-                            </Form.File>
-                        </div>
+                    // console.log('auth.currentUser.email : ', auth.currentUser.email);
+                    
+
+                    profile.map( item => (
+                        
+                        // item.email === auth.currentUser.email && 
+                        
+                        item.accountProfile === 'teacher' &&
+                            <div className="mt-5">
+                                <Form.Label> Ingresar un archivo: </Form.Label>
+                                <Form.File id="file">
+                                    <Form.File.Input />
+                                </Form.File>
+                            </div>
+                    ))
+                    
                 }
-                
+            </Form>
+            
+            <Form>
+                { profile.map( item => (console.log('item: ', item))) }
             </Form>
 
             <div className="w-100 text-center mt-2">
