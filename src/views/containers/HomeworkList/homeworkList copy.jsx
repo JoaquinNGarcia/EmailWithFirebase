@@ -222,29 +222,13 @@ const HomeworkList = (props) => {
                 <div className={props.profile.filter( item => item.email === props.user.email && item.accountProfile === 'teacher' ? "col-md-6" : "col-md-12" )  }>
                     <h3>Lista de tareas</h3>
                     {/* {console.log('allTask: ', allTask)} */}
-                    {
-                        !!profile && profile.accountProfile === 'teacher' ?
-                            <>
-                                <button
-                                    className="btn btn-warning btn-sm float-right ml-3"
-                                    onClick={ () => setListOfDone(!listOfDone) }
-                                >
-                                    Ver lista de realizados/pendientes
-                                </button>
-                                <button
-                                    className="btn btn-warning btn-sm float-right ml-3"
-                                    onClick={ () => setdetail(!detail) }
-                                >
-                                    Ver detalle
-                                </button>
-                            </>
-                        : 
-                            <button
-                                className="btn btn-warning btn-sm float-right ml-3"
-                                onClick={ () => setdetail(!detail) }
-                            >
-                                Ver detalle
-                            </button>
+                    {!!profile && profile.accountProfile === 'teacher'&&
+                        <button
+                            className="btn btn-warning btn-sm float-right ml-3"
+                            onClick={ () => setListOfDone(!listOfDone) }
+                        >
+                            Ver lista de realizados/pendientes
+                        </button>
                     }
                     <ul className="list-group">
                         {
@@ -254,6 +238,13 @@ const HomeworkList = (props) => {
                                     <li>
                                         {
                                             tareas.map(item => {
+                                                let showDetail = false;
+
+                                                // const setShowDetail = (id) => {
+                                                //     item.id === id &&
+                                                //         showDetail = !showDetail;
+                                                // }
+
                                                 return (
                                                     !!profile && profile.accountProfile === 'teacher'
                                                         ? ( <li className="list-group-item" key={item.id}>
@@ -271,10 +262,15 @@ const HomeworkList = (props) => {
                                                                     >
                                                                         Editar
                                                                     </button>
-                                                                    
+                                                                    <button
+                                                                        className="btn btn-warning btn-sm float-right ml-3"
+                                                                        onClick={ () => setShowDetail(item.id) }
+                                                                    >
+                                                                        Ver detalle
+                                                                    </button>
                                                                     
                                                                     {
-                                                                        detail && !!item.detail &&<p> <br/> {item.detail}</p>
+                                                                        showDetail && !!item.detail &&<p> <br/> {item.detail}</p>
                                                                     }
                                                                     <br/>
                                                                     {
@@ -315,6 +311,12 @@ const HomeworkList = (props) => {
                                                                                 // }
                                                                             />
                                                                         }
+                                                                        <button
+                                                                            className="btn btn-warning btn-sm float-right ml-4"
+                                                                            onClick={ () => setdetail(!detail) }
+                                                                        >
+                                                                            Ver detalle
+                                                                        </button>
                                                                         
                                                                         {
                                                                             detail && !!item.detail &&<p> <br/> {item.detail}</p>

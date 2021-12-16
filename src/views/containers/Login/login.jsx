@@ -18,10 +18,10 @@ import {
 const Login = () => {
     const emailRef = useRef();
     const passwordRef = useRef();
-    const { login } = useAuth()
-    const [ error, setError ] = useState("")
-    const [ loading, setLoading ] = useState(false)
-    const history = useHistory()
+    const { login } = useAuth();
+    const [ error, setError ] = useState('');
+    const [ loading, setLoading ] = useState(false);
+    const history = useHistory();
 
     async function handleSubmit(e) {
         e.preventDefault()
@@ -64,10 +64,7 @@ const Login = () => {
                 setError("Desactivamos temporalmente su cuenta debido a varios intentos fallidos de inicio de sesion, puede intentar de nuevo mas tarde o restablecer su contraseña.");
             error.code === 'auth/invalid-email' &&
                 setError('Email no válido')
-            error.code === 'auth/user-not-found' &&
-                setError('Email no registrado')
         }
-        setError("Error al iniciar sesión.");
         setLoading(false);
     }
 

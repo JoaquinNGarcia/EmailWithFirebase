@@ -33,7 +33,7 @@ const App = () => {
 
 	useEffect(() => {
 		auth.onAuthStateChanged(user => {
-			console.log('App - user: ', user);
+			// console.log('App - user: ', user);
 			user ? setFirebaseUser(user) : setFirebaseUser(null);
 		})
 	}, [])
@@ -42,9 +42,9 @@ const App = () => {
 			<div className="d-inherit w-180" style={{ maxWidth: "center" }}>
 				<Router>
 					<Navbar firebaseUser={firebaseUser}/>
-					<Container
+					{/* <Container
 						className="d-flex align-items-center justify-content-center"
-						style={{ minHeight: "100vh" }} >		
+						style={{ minHeight: "100vh" }} >		 */}
 						{/* <div className="w-100" style={{ maxWidth: "400px" }}> */}
 						<AuthProvider>
 							<Switch>
@@ -57,7 +57,7 @@ const App = () => {
 							</Switch>
 						</AuthProvider>
 						{/* </div> */}
-					</Container>
+					{/* </Container> */}
 				</Router>
 			</div>
 		) : (

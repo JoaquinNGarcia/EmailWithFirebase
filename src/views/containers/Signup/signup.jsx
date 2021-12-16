@@ -17,7 +17,7 @@ import {
 	useHistory
 } from "react-router-dom";
 import Dashboard from '../Dashboard/dashboard';
-// import { db } from '../../../config/firebaseApp';
+import { db } from '../../../config/firebaseApp';
 
 // import { postMailer } from '../../service/shared/onUserCreate.service'
 
@@ -70,7 +70,7 @@ const Signup = () => {
 	async function handleSubmit(e) {
 		e.preventDefault();
 
-		passwordRef.current.value !== passwordConfirmRef.current.value && setError("Las contraseñas no coinciden.");
+		// passwordRef.current.value !== passwordConfirmRef.current.value && setError("Las contraseñas no coinciden.");
 		if (passwordRef.current.value !== passwordConfirmRef.current.value) {
 			return setError("Las contraseñas no coinciden.");
 		}
@@ -79,24 +79,26 @@ const Signup = () => {
 			setError('');
 			setLoading(true);
 			// setAssociatedEmail(teacherAssociateEmail);
-			// console.log('associatedEmail: ', associatedEmail);
-			// console.log('accountProfile: ', accountProfile );
-			// const res = !!accountProfile
-			// 	? 
-				await signup(emailRef.current.value, passwordRef.current.value);
-				// : setError("Seleccione el tipo de cuenta.");
-			// console.log('res.user:', res.user);
+			console.log('1 - associatedEmail: ', associatedEmail);
+			setAssociatedEmail(associatedEmail);
+			console.log('2 - associatedEmail: ', associatedEmail);
 			
-			// await db.collection('user').doc(res.user.email).set({
-			// 	email: res.user.email,
-			// 	uid: res.user.uid,
-			// 	accountProfile,
-			// 	associatedEmail
-			// });
+			console.log('accountProfile: ', accountProfile );
+			const res = !!accountProfile
+				? await signup(emailRef.current.value, passwordRef.current.value)
+				: setError("Seleccione el tipo de cuenta.");
+			console.log('res.user:', res.user);
 			
-			// await db.collection(res.user.uid).add({
+			await db.collection('user').doc(res.user.email).set({
+				email: res.user.email,
+				uid: res.user.uid,
+				accountProfile,
+				associatedEmail
+			});
+
+			// await db.collection(res.user.uid).add({ //crea una nueva collection a modo de ejemplo, solo para copiar y usar de base
 			// 	name: 'ejemplo',
-			// 	fecha: Date.now()
+			// 	date: Date.now()
 			// });
 
 			<Dashboard isTeacherProp={ selectedAccountType }/>
@@ -106,15 +108,10 @@ const Signup = () => {
 
 			error.code === 'auth/weak-password' &&
                 setError("Contraseña débil - Ingrese 6 o mas caracteres.");
-
 			error.code === 'auth/invalid-email' &&
-                setError('Email no válido')
-            
+                setError('Email no válido');
             error.code === 'auth/email-already-in-use' &&
-                setError('Email ya utilizado')
-            
-
-			// setError("No se pudo crear una cuenta.");
+                setError('Email ya utilizado');
 		}
 		setLoading(false);
 	}
@@ -251,8 +248,8 @@ const Signup = () => {
 										label="Estudiante"
 										block
 										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-										checked
 										required
+										checked
 									/>
 								]
 						}

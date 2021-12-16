@@ -32,18 +32,16 @@ const Dashboard = ( { isTeacherProp } ) => {
             ? setUser(auth.currentUser)
             : history.push('/login');
 
-        // const obtenerDatos = async () => {
-        //     try {
-        //         const dataProfile = await db.collection('user').get();
-        //         const arrayDataProfile = dataProfile.docs.map(doc => ({ id: doc.id, ...doc.data() })) //...doc.data() <- Opererador de propagacion
-                
-        //         setProfile( arrayDataProfile );
-        //         // console.log('arrayDataProfile: ', arrayDataProfile);
-        //     } catch (error) {
-        //         console.log('Dashboard (obtenerDatos) - error: ', error);
-        //     }
-        // }
-        // obtenerDatos();
+        const obtenerDatos = async () => {
+            try {
+                const dataProfile = await db.collection('user').get();
+                const arrayDataProfile = dataProfile.docs.map(doc => ({ id: doc.id, ...doc.data() })) //...doc.data() <- Opererador de propagacion
+                setProfile( arrayDataProfile );
+            } catch (error) {
+                console.log('Dashboard (obtenerDatos) - error: ', error);
+            }
+        }
+        obtenerDatos();
 
     }, [history]);
 
@@ -95,29 +93,20 @@ const Dashboard = ( { isTeacherProp } ) => {
 
             <Form>
                 {
-                    // console.log('auth.currentUser.email : ', auth.currentUser.email);
-                    
-
-                    profile.map( item => (
-                        
-                        // item.email === auth.currentUser.email && 
-                        
-                        item.accountProfile === 'teacher' &&
+                    profile.map( item => {
+                        return (
+                            item.email === auth.currentUser.email && 
+                            item.accountProfile === 'teacher' &&
                             <div className="mt-5">
                                 <Form.Label> Ingresar un archivo: </Form.Label>
                                 <Form.File id="file">
                                     <Form.File.Input />
                                 </Form.File>
                             </div>
-                    ))
-                    
+                        )
+                    })
                 }
             </Form>
-            
-            <Form>
-                { profile.map( item => (console.log('item: ', item))) }
-            </Form>
-
             <div className="w-100 text-center mt-2">
                 <Button variant="link" onClick={ handleLogout }>
                     Cerrar sesión
