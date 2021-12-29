@@ -271,8 +271,7 @@ const HomeworkList = (props) => {
                                                                     >
                                                                         Editar
                                                                     </button>
-                                                                    
-                                                                    
+
                                                                     {
                                                                         detail && !!item.detail &&<p> <br/> {item.detail}</p>
                                                                     }

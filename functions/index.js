@@ -10,7 +10,7 @@ const userApp = express();
 userApp.use(cors({ origin: true }));
 
 const REACT_APP_SENDER_EMAIL="joaquingarcia7596@gmail.com"
-const REACT_APP_SENDER_PASSWORD="j39290658garcia7"
+const REACT_APP_SENDER_PASSWORD=""
 
 if (process.env.NODE_ENV != "production") {
   require("dotenv").config();
