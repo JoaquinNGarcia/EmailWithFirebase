@@ -1,8 +1,7 @@
-import React,
-	{
-        useEffect,
-		useState
-	} from 'react';
+import React, {
+    useEffect,
+    useState
+} from 'react';
 import {
 	Alert,
 	Button,
@@ -17,7 +16,9 @@ import {
 import moment from 'moment';
 import HomeworkList from '../HomeworkList/homeworkList';
 import { auth, db } from '../../../config/firebaseApp';
+import Gimnasio from '../Gimnasio/gimnasio';
 // import shortid from 'shortid' //https://www.npmjs.com/package/shortid
+
 
 const Dashboard = ( { isTeacherProp } ) => {
     const [ error, setError ] = useState('');
@@ -26,6 +27,7 @@ const Dashboard = ( { isTeacherProp } ) => {
     // const [ isLoading, setIsLoading ] = useState(true);
     const { currentUser, logout } = useAuth();
     const history = useHistory();
+
 
     useEffect(() => {
         auth.currentUser
@@ -42,7 +44,6 @@ const Dashboard = ( { isTeacherProp } ) => {
             }
         }
         obtenerDatos();
-
     }, [history]);
 
     const time = moment().format('HH:mm');
@@ -84,11 +85,11 @@ const Dashboard = ( { isTeacherProp } ) => {
                         Actualizar perfil
                     </Link>
                 </Card.Body>
-                    {
-                        user && (
-                            <HomeworkList user={ user } profile={ profile }/>
-                        )
-                    }
+                {
+                    auth.currentUser.email === 'vitalite@mail.com'
+                        ? <Gimnasio/>
+                        : auth.currentUser.email !== 'vitalite@mail.com' && user && <HomeworkList user={ user } profile={ profile }/>
+                }
             </div>
 
             <Form>
@@ -107,7 +108,7 @@ const Dashboard = ( { isTeacherProp } ) => {
                     })
                 }
             </Form>
-            <div className="w-100 text-center mt-2">
+            <div className="w-100 text-center mt-2  ">
                 <Button variant="link" onClick={ handleLogout }>
                     Cerrar sesión
                 </Button>

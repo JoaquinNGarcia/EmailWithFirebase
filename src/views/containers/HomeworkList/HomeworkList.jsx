@@ -59,16 +59,16 @@ const HomeworkList = (props) => {
                 
                 const data = await db.collection( uidTeacher )
                     .limit(2)
-                    .orderBy('date')
+                    .orderBy('date', 'desc')
                     .get()
-                        
+
                 const arrayData = data.docs.map(doc => ({ id: doc.id, ...doc.data() })) //...doc.data() <- Opererador de propagacion
                 setUltimo(data.docs[data.docs.length - 1]);
                 setTareas(arrayData);
 
                 const query = await db.collection(uidTeacher)
                     .limit(2)
-                    .orderBy('date')
+                    .orderBy('date', 'desc')
                     .startAfter(data.docs[data.docs.length - 1])
                     .get()
                 query.empty
@@ -92,7 +92,7 @@ const HomeworkList = (props) => {
         try {
             const data = await db.collection(uidTeacher)
                 .limit(2)
-                .orderBy('date')
+                .orderBy('date', 'desc')
                 .startAfter(ultimo)
                 .get()
             const arrayData = data.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -104,7 +104,7 @@ const HomeworkList = (props) => {
 
             const query = await db.collection(uidTeacher)
                 .limit(2)
-                .orderBy('date')
+                .orderBy('date', 'desc')
                 .startAfter(data.docs[data.docs.length - 1])
                 .get()
             query.empty
@@ -162,7 +162,6 @@ const HomeworkList = (props) => {
         setTaskDetail(item.detail);
         setId(item.id);
     }
-
 
     const editar = async (e) => {
         e.preventDefault();

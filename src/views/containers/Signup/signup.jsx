@@ -88,7 +88,7 @@ const Signup = () => {
 				? await signup(emailRef.current.value, passwordRef.current.value)
 				: setError("Seleccione el tipo de cuenta.");
 			console.log('res.user:', res.user);
-			
+
 			await db.collection('user').doc(res.user.email).set({
 				email: res.user.email,
 				uid: res.user.uid,
