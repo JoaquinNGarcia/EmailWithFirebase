@@ -10,7 +10,7 @@ const userApp = express();
 userApp.use(cors({ origin: true }));
 
 const REACT_APP_SENDER_EMAIL="joaquingarcia7596@gmail.com"
-const REACT_APP_SENDER_PASSWORD=""
+const REACT_APP_SENDER_PASSWORD="nilzukepqgaiclzb"
 
 if (process.env.NODE_ENV != "production") {
   require("dotenv").config();
@@ -50,10 +50,11 @@ userApp.post("/", async (request, response) => {
   const user = body;
   const isValidMessage = body.message && body.to && body.subject;
 
-  !isValidMessage && response.status(400).send({ message: "invalid request" });
-
+  if(!isValidMessage){
+    return response.status(400).send({ message: "invalid request" });
+  }
   const mailTransport = nodemailer.createTransport({
-    service: 'Gmail',
+    service: 'gmail',
     auth: {
       user: REACT_APP_SENDER_EMAIL,
       pass: REACT_APP_SENDER_PASSWORD,
@@ -61,7 +62,7 @@ userApp.post("/", async (request, response) => {
   });
 
   const mailOptions = {
-    from: "LanguageApp@mail.com",
+    from: REACT_APP_SENDER_EMAIL,
     to: body.to,
     subject: body.subject,
     text: body.message
@@ -69,14 +70,16 @@ userApp.post("/", async (request, response) => {
 
   mailTransport.sendMail(mailOptions, (err, data) => {
     if (err) {
-      return response.status(500).send({ message: "Error: " + err.message + "data: " + data });
+      // return response.status(500).send({ message: "Error: " + err.message + "data: " + data });
+      return response.status(500).send({ message: "Error: " + err.message });
     }
     return response.send({ message: "email sent" });
   });
 
-  await db.collection("users").add(user);
-  response.status(201).send({ message: "Created" });
+//   await db.collection("users").add(user);
+//   response.status(201).send({ message: "Created" });
 });
+module.exports.mailer = functions.https.onRequest(userApp);
 
 //Obtener todos los usuarios
 userApp.get("/", async (request, response) => {
@@ -92,6 +95,7 @@ userApp.get("/", async (request, response) => {
 
   response.status(200).send(JSON.stringify(users));
 });
+
 
 //Obtener un usuario en puntual con el id
 userApp.get("/:id", async (request, response) => {

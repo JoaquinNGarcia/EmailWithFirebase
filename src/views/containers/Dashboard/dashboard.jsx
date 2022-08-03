@@ -14,7 +14,7 @@ import {
 	useHistory
 } from "react-router-dom";
 import moment from 'moment';
-import HomeworkList from '../HomeworkList/homeworkList';
+import HomeworkList from '../HomeworkList/HomeworkList';
 import { auth, db } from '../../../config/firebaseApp';
 import Gimnasio from '../Gimnasio/gimnasio';
 // import shortid from 'shortid' //https://www.npmjs.com/package/shortid
