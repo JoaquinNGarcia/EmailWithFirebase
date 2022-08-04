@@ -16,7 +16,7 @@ import {
 	Link,
 	useHistory
 } from "react-router-dom";
-import Dashboard from '../Dashboard/dashboard';
+import EmailList from '../EmailList/EmailList';
 import { db } from '../../../config/firebaseApp';
 
 // import { postMailer } from '../../service/shared/onUserCreate.service'
@@ -101,7 +101,7 @@ const Signup = () => {
 			// 	date: Date.now()
 			// });
 
-			<Dashboard isTeacherProp={ selectedAccountType }/>
+			<EmailList />
 			history.push("/");
 		} catch (error) {
 			console.log('Signup (handleSubmit) - error: ', error);

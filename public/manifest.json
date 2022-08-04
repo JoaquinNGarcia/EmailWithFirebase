@@ -1,6 +1,6 @@
 {
-  "short_name": "Language App",
-  "name": "Language_App",
+  "short_name": "Email App",
+  "name": "Email_App",
   "icons": [
   ],
   "start_url": "./index.html",
