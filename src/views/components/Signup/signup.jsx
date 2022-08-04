@@ -44,7 +44,7 @@ const Signup = () => {
 			body: {
 				to: emailRef.current.value,
 				message: "Bienvenido de nuevo",
-				subject: "LanguageApp"
+				subject: "EmailApp"
 			}
 		};
 		fetch('http://localhost:5001/languageapp-4985f/us-central1/mailer', requestOptions )
