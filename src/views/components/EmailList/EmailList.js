@@ -54,18 +54,22 @@ const EmailList = () => {
           } catch (error){
             console.log('EmailList (obtenerMails) - error: ', error);
           }
-        }
+        }        
         obtenerMails();
     }, [history]);
 
   return (
-    <>
-      
+    <>      
       <Header />
       <div className="emailList">
         <div className="emailList-settings">
           <Sidebar emails={emails} />
           <div className="emailList-settingsLeft">
+            <div className="emailList-sections">
+              <Section Icon={InboxIcon} title="Primary" color="red" selected />
+              <Section Icon={PeopleIcon} title="Social" color="#1A73E8" />
+              <Section Icon={LocalOfferIcon} title="Promotions" color="green" />
+            </div>
             <Checkbox />
             <IconButton>
               <ArrowDropDownIcon />
@@ -76,8 +80,7 @@ const EmailList = () => {
             <IconButton>
               <MoreVertIcon />
             </IconButton>
-          </div>
-          <div className="emailList-settingsRight">
+
             <IconButton>
               <ChevronLeftIcon />
             </IconButton>
@@ -90,29 +93,26 @@ const EmailList = () => {
             <IconButton>
               <SettingsIcon />
             </IconButton>
+            <div className="emailList-list">
+              {emails.map(({ id, data: { to, subject, message, timestamp } }) => (
+                <EmailRow
+                  id={id}
+                  key={id}
+                  title={to}
+                  subject={subject}
+                  description={message}
+                  time={new Date(timestamp?.seconds * 1000).toUTCString()}
+                />
+                ))}
+              {/* <EmailRow
+                title="MailTest"
+                subject="testing"
+                description="Hellow mail"
+                time="10pm"
+                /> */}
+            </div>
           </div>
-          {/* <div className="emailList-sections">
-            <Section Icon={InboxIcon} title="Primary" color="red" selected />
-            <Section Icon={PeopleIcon} title="Social" color="#1A73E8" />
-            <Section Icon={LocalOfferIcon} title="Promotions" color="green" />
-          </div> */}
-          {/* <div className="emailList-list">
-            {emails.map(({ id, data: { to, subject, message, timestamp } }) => (
-              <EmailRow
-              id={id}
-              key={id}
-              title={to}
-              subject={subject}
-              description={message}
-              time={new Date(timestamp?.seconds * 1000).toUTCString()}
-              />
-              ))}
-            <EmailRow
-              title="MailTest"
-              subject="testing"
-              description="Hellow mail"
-              time="10pm"
-              />
+          {/* <div className="emailList-settingsRight">
           </div> */}
         </div>
       </div>

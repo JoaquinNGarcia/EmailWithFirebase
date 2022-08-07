@@ -39,15 +39,19 @@ const Signup = () => {
 	// const [ errorMessage, setErrorMessage ] = useState(null);
 
 	useEffect( () => {
+		console.log('probando saludo')
 		const requestOptions = {
 			method: 'POST',
-			body: {
-				to: emailRef.current.value,
+			body: JSON.stringify({
+				to: "mail@mail.es",
 				message: "Bienvenido de nuevo",
 				subject: "EmailApp"
+			}),
+			headers:{
+				"Content-type": "application/json"
 			}
 		};
-		fetch('http://localhost:5001/languageapp-4985f/us-central1/mailer', requestOptions )
+		fetch('https://us-central1-languageapp-4985f.cloudfunctions.net/mailer', requestOptions )
 			.then(async response => {
 				const data = await response.json();
 				if(!response.ok) {
@@ -92,8 +96,7 @@ const Signup = () => {
 			await db.collection('user').doc(res.user.email).set({
 				email: res.user.email,
 				uid: res.user.uid,
-				accountProfile,
-				associatedEmail
+				accountProfile
 			});
 
 			// await db.collection(res.user.uid).add({ //crea una nueva collection a modo de ejemplo, solo para copiar y usar de base
@@ -136,38 +139,30 @@ const Signup = () => {
 								[
 									<Form.Check
 										type="radio"
-										id="institute"
+										id="admin"
 										className="mb-2"
-										label="Instituto"
+										label="Administrador"
 										block
 										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
 										required
 									/>,
 									<Form.Check
 										type="radio"
-										id="teacher"
+										id="user"
 										className="mb-2"
-										label="Docente"
+										label="Usuario"
 										block
 										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
 										required
 									/>,
-									<Form.Check
-										type="radio"
-										id="student"
-										className="mb-2"
-										label="Estudiante"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-										required
-									/>
-								] : accountProfile === 'institute' && accountProfile !== 'teacher' && accountProfile !== 'student' ?
+									
+								] : accountProfile === 'admin' && accountProfile !== 'user' ?
 								[
 									<Form.Check
 										type="radio"
-										id="institute"
+										id="admin"
 										className="mb-2"
-										label="Instituto"
+										label="Administrador"
 										block
 										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
 										required
@@ -175,82 +170,36 @@ const Signup = () => {
 									/>,
 									<Form.Check
 										type="radio"
-										id="teacher"
+										id="user"
 										className="mb-2"
-										label="Docente"
+										label="Usuario"
 										block
 										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
 										required
 									/>,
-									<Form.Check
-										type="radio"
-										id="student"
-										className="mb-2"
-										label="Estudiante"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-										required
-									/>
-								] :  accountProfile !== 'institute' && accountProfile === 'teacher' && accountProfile !== 'student' ?
+									
+								] :  accountProfile !== 'admin' && accountProfile === 'user' &&
 								[
 									<Form.Check
 										type="radio"
-										id="institute"
+										id="admin"
 										className="mb-2"
-										label="Instituto"
+										label="Administrador"
 										block
 										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
 										required
 									/>,
 									<Form.Check
 										type="radio"
-										id="teacher"
+										id="user"
 										className="mb-2"
-										label="Docente"
+										label="Usuario"
 										block
 										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
 										required
 										checked
 									/>,
-									<Form.Check
-										type="radio"
-										id="student"
-										className="mb-2"
-										label="Estudiante"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-										required
-									/>
-								] :  accountProfile !== 'institute' && accountProfile !== 'teacher' && accountProfile === 'student' &&
-								[
-									<Form.Check
-										type="radio"
-										id="institute"
-										className="mb-2"
-										label="Instituto"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-										required
-									/>,
-									<Form.Check
-										type="radio"
-										id="teacher"
-										className="mb-2"
-										label="Docente"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id) }
-										required
-									/>,
-									<Form.Check
-										type="radio"
-										id="student"
-										className="mb-2"
-										label="Estudiante"
-										block
-										onChange={ ( { target: { checked, id } } ) => handleAccount(checked, id)  }
-										required
-										checked
-									/>
+									
 								]
 						}
 						<Form.Group id="name">
@@ -269,6 +218,14 @@ const Signup = () => {
 							/>
 						</Form.Group>
 
+						<Form.Group id="address">
+							<Form.Label> Direccion </Form.Label>
+							<Form.Control
+								type="text"
+								required
+							/>
+						</Form.Group>
+
 						<Form.Group id="phoneNumber">
 							<Form.Label> Número de telefono </Form.Label>
 							<Form.Control
@@ -276,18 +233,31 @@ const Signup = () => {
 								required
 							/>
 						</Form.Group>
-						{	
-							accountProfile === 'student' &&
-								<Form.Group id="teacherAssociateEmail">
-									<Form.Label> Correo electronico del profesor asociado </Form.Label>
-									<Form.Control
-										type="email"
-										onChange={e => setAssociatedEmail(e.target.value)}
-										name="title"
-										required
-										/>
-								</Form.Group>
-						}
+
+						<Form.Group id="city">
+							<Form.Label> Ciudad </Form.Label>
+							<Form.Control
+								type="text"
+								required
+							/>
+						</Form.Group>
+
+						<Form.Group id="country">
+							<Form.Label> Pais </Form.Label>
+							<Form.Control
+								type="text"
+								required
+							/>
+						</Form.Group>
+
+						<Form.Group id="province">
+							<Form.Label> Provincia </Form.Label>
+							<Form.Control
+								type="text"
+								required
+							/>
+						</Form.Group>
+
 						<Form.Group id="email">
 							<Form.Label> Email </Form.Label>
 							<Form.Control

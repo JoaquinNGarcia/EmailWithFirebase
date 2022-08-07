@@ -42,11 +42,9 @@ function SendMail() {
 		fetch('https://us-central1-languageapp-4985f.cloudfunctions.net/mailer', requestOptions )
 			.then(async response => {
 				const data = await response.json();
-        console.log('data: ', data)
 				if(!response.ok) {
 					return Promise.reject( (data && data.message) || response.status ) //error
 				}
-				// setPostId(data.id);
 			})
 			.catch( error => {
 				// setErrorMessage(error.toString());

@@ -19,7 +19,6 @@ const auth = firebaseApp.auth();
 export {app, auth, db};
 export default firebaseApp;
 
-
 // import app from 'firebase/compat/app';
 // import 'firebase/compat/firestore';
 // import "firebase/compat/auth";

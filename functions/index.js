@@ -9,9 +9,6 @@ const db = admin.firestore();
 const userApp = express();
 userApp.use(cors({ origin: true }));
 
-const REACT_APP_SENDER_EMAIL="joaquingarcia7596@gmail.com"
-const REACT_APP_SENDER_PASSWORD="nilzukepqgaiclzb"
-
 if (process.env.NODE_ENV != "production") {
   require("dotenv").config();
 }
@@ -56,13 +53,13 @@ userApp.post("/", async (request, response) => {
   const mailTransport = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: REACT_APP_SENDER_EMAIL,
-      pass: REACT_APP_SENDER_PASSWORD,
+      user: process.env.REACT_APP_SENDER_EMAIL,
+      pass: process.env.REACT_APP_SENDER_PASSWORD,
     }
   });
 
   const mailOptions = {
-    from: REACT_APP_SENDER_EMAIL,
+    from: process.env.REACT_APP_SENDER_EMAIL,
     to: body.to,
     subject: body.subject,
     text: body.message
@@ -100,8 +97,8 @@ userApp.get("/", async (request, response) => {
 //Obtener un usuario en puntual con el id
 userApp.get("/:id", async (request, response) => {
   const snapshot = await db
-    .collection('users')
-    .doc(request.params.id)
+    .collection('user')
+    .doc(request.params.uid)
     .get();
 
   const userId = snapshot.id;
@@ -114,7 +111,7 @@ userApp.get("/:id", async (request, response) => {
 userApp.put("/:id", async (request, response) => {
   const body = request.body;
   
-  await db.collection('users').doc(request.params.id).update(body);
+  await db.collection('user').doc(request.params.id).update(body);
   
   response.status(200).send()
 });
@@ -183,8 +180,8 @@ exports.user = functions.https.onRequest(userApp);
 // const mailTransport = nodemailer.createTransport({
 //   service: "gmail",
 //   auth: {
-//     user: REACT_APP_SENDER_EMAIL,
-//     pass: REACT_APP_SENDER_PASSWORD,
+//     user: process.env.REACT_APP_SENDER_EMAIL,
+//     pass: process.env.REACT_APP_SENDER_PASSWORD,
 //   },
 // });
 
@@ -257,7 +254,7 @@ exports.user = functions.https.onRequest(userApp);
 // const nodemailer = require("nodemailer"); //sirve para crear el transport que se va a encargar de enviar el correo electronico
 // require("dotenv").config();
 
-// const {REACT_APP_SENDER_EMAIL, REACT_APP_SENDER_PASSWORD} = process.env;
+// const {process.env.REACT_APP_SENDER_EMAIL, process.env.REACT_APP_SENDER_PASSWORD} = process.env;
 
 // exports.sendEmailNotification=functions
 //     .firestore
@@ -269,8 +266,8 @@ exports.user = functions.https.onRequest(userApp);
 //         port: 465,
 //         secure: true,
 //         auth: {
-//           user: REACT_APP_SENDER_EMAIL,
-//           pass: REACT_APP_SENDER_PASSWORD,
+//           user: process.env.REACT_APP_SENDER_EMAIL,
+//           pass: process.env.REACT_APP_SENDER_PASSWORD,
 //         },
 //       });
 //       authData.sendMail({
@@ -325,8 +322,8 @@ exports.user = functions.https.onRequest(userApp);
 // const mailTransport = nodemailer.createTransport({
 //   service: 'Gmail',
 //   auth: {
-//     user: REACT_APP_SENDER_EMAIL,
-//     pass: REACT_APP_SENDER_PASSWORD,
+//     user: process.env.REACT_APP_SENDER_EMAIL,
+//     pass: process.env.REACT_APP_SENDER_PASSWORD,
 //   }
 // });
 
@@ -335,7 +332,7 @@ exports.user = functions.https.onRequest(userApp);
 //   const { email } = user;
 //   async function sendWelcomeMail(email) {
 //     const mailDetails = {
-//       from: REACT_APP_SENDER_EMAIL,
+//       from: process.env.REACT_APP_SENDER_EMAIL,
 //       to: email,
 //       subject: "test",
 //       html:
@@ -354,7 +351,7 @@ exports.user = functions.https.onRequest(userApp);
 //   const { email, name } = user;
 //   async function sendGoodbyeMail(email) {
 //     const mailOptions = {
-//         from: REACT_APP_SENDER_EMAIL,
+//         from: process.env.REACT_APP_SENDER_EMAIL,
 //         to: email,
 //         subject: `Adios`,
 //     };
